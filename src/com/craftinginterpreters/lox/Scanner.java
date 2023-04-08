@@ -45,6 +45,7 @@ public class Scanner {
             case '+' -> addToken(PLUS);
             case ';' -> addToken(SEMICOLON);
             case '*' -> addToken(STAR);
+            case '^' -> addToken(HAT);
             case '!' -> addToken(match('=') ? BANG_EQUAL : BANG);
             case '=' -> addToken(match('=') ? EQUAL_EQUAL : EQUAL);
             case '<' -> addToken(match('=') ? LESS_EQUAL : LESS);
@@ -106,6 +107,8 @@ public class Scanner {
         return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
     }
 
+    private boolean isSign(char c) { return c == '+' || c == '-'; }
+
     private boolean isAlphaNumeric(char c) {
         return isDigit(c) || isAlpha(c);
     }
@@ -166,6 +169,15 @@ public class Scanner {
         if(peek() == '.' && isDigit(peekNext())) {
             advance();
             while(isDigit(peek())) advance();
+        }
+
+        if(peek() == 'E' || peek() == 'e') {
+            // We might have an exponential number, check if the next value is a sign?
+            advance();
+            if (isSign(peek()) && isDigit(peekNext())) {
+                advance();
+            }
+            while (isDigit(peek())) advance();
         }
 
         addToken(NUMBER, Double.parseDouble(source.substring(start, current)));

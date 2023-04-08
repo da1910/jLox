@@ -114,9 +114,31 @@ public class Parser {
     private Expr factor() {
         Expr expr;
         try {
-            expr = unary();
+            expr = exponent();
         } catch (ParseError parseError) {
             if (match(SLASH, STAR)) {
+                Token operator = previous();
+                Expr right = exponent();
+                throw error(operator, "Binary operator encountered with no left operand.");
+            }
+            throw parseError;
+        }
+
+        while(match(SLASH, STAR)) {
+            Token operator = previous();
+            Expr right = exponent();
+            expr = new Expr.Binary(expr, operator, right);
+        }
+
+        return expr;
+    }
+
+    private Expr exponent() {
+        Expr expr;
+        try {
+            expr = unary();
+        } catch (ParseError parseError) {
+            if (match(HAT)) {
                 Token operator = previous();
                 Expr right = unary();
                 throw error(operator, "Binary operator encountered with no left operand.");
@@ -124,7 +146,7 @@ public class Parser {
             throw parseError;
         }
 
-        while(match(SLASH, STAR)) {
+        while(match(HAT)) {
             Token operator = previous();
             Expr right = unary();
             expr = new Expr.Binary(expr, operator, right);

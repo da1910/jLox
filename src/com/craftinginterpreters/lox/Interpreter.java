@@ -73,6 +73,9 @@ public class Interpreter implements Expr.Visitor<Object> {
             }
             case SLASH -> {
                 checkNumberOperand(expr.operator, left, right);
+                if ((Double)right == 0.0) {
+                    throw new RuntimeError(expr.operator, "Divide by zero.");
+                }
                 return (double) left / (double) right;
             }
             case STAR -> {
@@ -83,8 +86,8 @@ public class Interpreter implements Expr.Visitor<Object> {
                 if (left instanceof Double && right instanceof Double) {
                     return (double) left + (double) right;
                 }
-                if (left instanceof String && right instanceof String) {
-                    return (String) left + (String) right;
+                if (left instanceof String || right instanceof String) {
+                    return stringify(left) + stringify(right);
                 }
                 throw new RuntimeError(expr.operator, "Operands must be two numbers or two strings.");
             }
@@ -112,6 +115,10 @@ public class Interpreter implements Expr.Visitor<Object> {
             }
             case COMMA -> {
                 return right;
+            }
+            case HAT -> {
+                checkNumberOperand(expr.operator, left, right);
+                return Math.pow((double)left, (double)right);
             }
         }
         return null;
