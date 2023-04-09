@@ -6,10 +6,11 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Lox {
-    private static Interpreter interpreter = new Interpreter();
+    private static final Interpreter interpreter = new Interpreter();
     static boolean hadError = false;
     static boolean hadRuntimeError = false;
     public static void main(String[] args) throws IOException {
@@ -49,13 +50,16 @@ public class Lox {
         List<Token> tokens = scanner.scanTokens();
 
         Parser parser = new Parser(tokens);
-        Expr expression = parser.parse();
+        List<Stmt> statements;
 
-        if (expression == null) hadError = true;
+        try {
+            statements = parser.parse();
+        } catch (Parser.ParseError parseError) {
+            hadError = true;
+            return;
+        }
 
-        if(hadError) return;
-
-        interpreter.interpret(expression);
+        interpreter.interpret(statements);
     }
 
     static void error(int line, String message) {
